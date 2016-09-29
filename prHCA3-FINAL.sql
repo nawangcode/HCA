@@ -1,8 +1,8 @@
 USE [RMDW]
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[prHCA1]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].[prHCA1]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[prHCA3]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[prHCA3]
 GO
 
 SET ANSI_NULLS ON
@@ -11,8 +11,10 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE [dbo].[prHCA1] 
+CREATE PROCEDURE [dbo].[prHCA3] 
 @date DATETIME =NULL,
+@startTime DATETIME =NULL,
+@endTime DATETIME =NULL,
 @unit NVARCHAR(50)=NULL,
 @levels NVARCHAR(MAX)=NULL
 AS
@@ -20,6 +22,12 @@ BEGIN
 
 	IF @date IS NULL
 	SET @date = GETDATE() - 1
+
+	IF @startTime IS NULL
+	SET @startTime ='07:00:00'
+
+	IF @endTime IS NULL
+	SET @endTime = '08:00:00'
 
 	DECLARE @FACILITY INT
 	SET @FACILITY =1
@@ -81,7 +89,7 @@ BEGIN
 	FROM [dbo].[FactEventActivity] F
 	JOIN #LOCATION L ON F.Location_Key = L.Location_Key
 	JOIN @Level S ON (F.Staff_Key = S.StaffLevelKey AND S.IsStaff = 1) OR (F.Service_Level_Key = S.StaffLevelKey AND S.IsStaff = 0)
-	WHERE F.Group_Date_Key = CONVERT(VARCHAR(8), @date, 112) AND In_Room_Duration > 0 AND Group_Complete_Indr = 1
+	WHERE F.Group_Date_Key = CONVERT(VARCHAR(8), @date, 112) AND In_Room_Duration > 0
 
 --SELECT * FROM #EVENTS
 -- return
